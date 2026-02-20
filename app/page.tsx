@@ -17,6 +17,8 @@ export default function ClientDetails() {
     citizenship: "",
     address: "",
     phoneNumber: "",
+    vehicleName: "",
+    carNumberPlate: "",
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -39,6 +41,8 @@ export default function ClientDetails() {
     if (!formData.citizenship.trim()) newErrors.citizenship = "Citizenship is required"
     if (!formData.address.trim()) newErrors.address = "Residential address is required"
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required"
+    if (!formData.vehicleName.trim()) newErrors.vehicleName = "Vehicle name is required"
+    if (!formData.carNumberPlate.trim()) newErrors.carNumberPlate = "Car number plate is required"
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -59,7 +63,9 @@ ID/Passport: ${formData.idPassport}
 Driving License: ${formData.dlNumber}
 Citizenship: ${formData.citizenship}
 Address: ${formData.address}
-Phone Number: ${formData.phoneNumber}`
+Phone Number: ${formData.phoneNumber}
+Vehicle Name: ${formData.vehicleName}
+Car Number Plate: ${formData.carNumberPlate}`
 
     // Encode message for URL
     const encodedMessage = encodeURIComponent(message)
@@ -149,6 +155,38 @@ Phone Number: ${formData.phoneNumber}`
                   className={errors.citizenship ? "border-destructive" : ""}
                 />
                 {errors.citizenship && <p className="text-sm text-destructive">{errors.citizenship}</p>}
+              </div>
+
+              {/* Vehicle Name */}
+              <div className="space-y-2">
+                <Label htmlFor="vehicleName">
+                  Vehicle Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="vehicleName"
+                  name="vehicleName"
+                  placeholder="Toyota Camry"
+                  value={formData.vehicleName}
+                  onChange={handleChange}
+                  className={errors.vehicleName ? "border-destructive" : ""}
+                />
+                {errors.vehicleName && <p className="text-sm text-destructive">{errors.vehicleName}</p>}
+              </div>
+
+              {/* Car Number Plate */}
+              <div className="space-y-2">
+                <Label htmlFor="carNumberPlate">
+                  Car Number Plate <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="carNumberPlate"
+                  name="carNumberPlate"
+                  placeholder="KAB 123C"
+                  value={formData.carNumberPlate}
+                  onChange={handleChange}
+                  className={errors.carNumberPlate ? "border-destructive" : ""}
+                />
+                {errors.carNumberPlate && <p className="text-sm text-destructive">{errors.carNumberPlate}</p>}
               </div>
             </div>
 
