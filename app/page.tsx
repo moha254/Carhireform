@@ -19,6 +19,7 @@ export default function ClientDetails() {
     phoneNumber: "",
     vehicleName: "",
     carNumberPlate: "",
+    numberOfDays: "",
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -43,6 +44,10 @@ export default function ClientDetails() {
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required"
     if (!formData.vehicleName.trim()) newErrors.vehicleName = "Vehicle name is required"
     if (!formData.carNumberPlate.trim()) newErrors.carNumberPlate = "Car number plate is required"
+    if (!formData.numberOfDays.trim()) newErrors.numberOfDays = "Number of days is required"
+    if (formData.numberOfDays && (parseInt(formData.numberOfDays) < 1 || parseInt(formData.numberOfDays) > 365)) {
+      newErrors.numberOfDays = "Number of days must be between 1 and 365"
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -65,7 +70,8 @@ Citizenship: ${formData.citizenship}
 Address: ${formData.address}
 Phone Number: ${formData.phoneNumber}
 Vehicle Name: ${formData.vehicleName}
-Car Number Plate: ${formData.carNumberPlate}`
+Car Number Plate: ${formData.carNumberPlate}
+Days Car Gone: ${formData.numberOfDays} days`
 
     // Encode message for URL
     const encodedMessage = encodeURIComponent(message)
@@ -188,6 +194,25 @@ Car Number Plate: ${formData.carNumberPlate}`
                 />
                 {errors.carNumberPlate && <p className="text-sm text-destructive">{errors.carNumberPlate}</p>}
               </div>
+
+              {/* Number of Days */}
+              <div className="space-y-2">
+                <Label htmlFor="numberOfDays">
+                  Number of Days <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="numberOfDays"
+                  name="numberOfDays"
+                  type="number"
+                  min="1"
+                  max="365"
+                  placeholder="1"
+                  value={formData.numberOfDays}
+                  onChange={handleChange}
+                  className={errors.numberOfDays ? "border-destructive" : ""}
+                />
+                {errors.numberOfDays && <p className="text-sm text-destructive">{errors.numberOfDays}</p>}
+              </div>
             </div>
 
             {/* Address - Full Width */}
@@ -222,6 +247,15 @@ Car Number Plate: ${formData.carNumberPlate}`
               />
               {errors.phoneNumber && <p className="text-sm text-destructive">{errors.phoneNumber}</p>}
             </div>
+
+            {/* Rental Duration Display */}
+            {formData.numberOfDays && parseInt(formData.numberOfDays) > 0 && (
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
+                <div className="text-lg font-semibold text-primary">
+                  Car Gone For: {formData.numberOfDays} days
+                </div>
+              </div>
+            )}
 
             <Button type="submit" className="w-full text-lg h-12" size="lg">
               Submit via WhatsApp
