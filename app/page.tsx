@@ -4,13 +4,37 @@ import type React from "react"
 
 import Image from "next/image"
 import { useState, type FormEvent } from "react"
+import {
+  Car,
+  CalendarDays,
+  CreditCard,
+  Flag,
+  Hash,
+  IdCard,
+  MapPin,
+  MessageCircle,
+  Phone,
+  User,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
+
+type FieldName =
+  | "fullName"
+  | "idPassport"
+  | "dlNumber"
+  | "citizenship"
+  | "address"
+  | "phoneNumber"
+  | "vehicleName"
+  | "carNumberPlate"
+  | "numberOfDays"
 
 export default function ClientDetails() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Record<FieldName, string>>({
     fullName: "",
     idPassport: "",
     dlNumber: "",
@@ -22,19 +46,18 @@ export default function ClientDetails() {
     numberOfDays: "",
   })
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-    // Clear error when user starts typing
-    if (errors[name]) {
+    if (errors[name as FieldName]) {
       setErrors((prev) => ({ ...prev, [name]: "" }))
     }
   }
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Partial<Record<FieldName, string>> = {}
 
     if (!formData.fullName.trim()) newErrors.fullName = "Full name is required"
     if (!formData.idPassport.trim()) newErrors.idPassport = "ID/Passport number is required"
@@ -60,213 +83,249 @@ export default function ClientDetails() {
       return
     }
 
+    const submittedAt = new Date().toLocaleString("en-GB", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    })
+
     // Format message for WhatsApp
-    const message = `Shilaabo Car Hire - Client Details
+    const message = [
+      "🚗 *SHILAABO CAR HIRE*",
+      "_New Booking — Client Details_",
+      "━━━━━━━━━━━━━━━━━━━━",
+      "",
+      "👤 *Personal Details*",
+      `• Full Name: ${formData.fullName}`,
+      `• ID / Passport: ${formData.idPassport}`,
+      `• Driving License: ${formData.dlNumber}`,
+      `• Citizenship: ${formData.citizenship}`,
+      `• Phone: ${formData.phoneNumber}`,
+      `• Address: ${formData.address}`,
+      "",
+      "🔑 *Rental Details*",
+      `• Vehicle: ${formData.vehicleName}`,
+      `• Number Plate: ${formData.carNumberPlate}`,
+      `• Duration: ${formData.numberOfDays} day(s)`,
+      "",
+      "━━━━━━━━━━━━━━━━━━━━",
+      `🕒 Submitted: ${submittedAt}`,
+    ].join("\n")
 
-Full Name: ${formData.fullName}
-ID/Passport: ${formData.idPassport}
-Driving License: ${formData.dlNumber}
-Citizenship: ${formData.citizenship}
-Address: ${formData.address}
-Phone Number: ${formData.phoneNumber}
-Vehicle Name: ${formData.vehicleName}
-Car Number Plate: ${formData.carNumberPlate}
-Days Car Gone: ${formData.numberOfDays} days`
-
-    // Encode message for URL
     const encodedMessage = encodeURIComponent(message)
 
-    // Replace with your WhatsApp number (format: country code + number, no + or spaces)
-    // Example: for +1 234 567 8900, use 12345678900
-    const whatsappNumber = "254792837410" // Change this to Shilaabo's WhatsApp number
+    // WhatsApp number (format: country code + number, no + or spaces)
+    const whatsappNumber = "254792837410"
 
-    // Open WhatsApp with pre-filled message
     window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, "_blank")
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl shadow-xl">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-background p-3 rounded-full border border-border">
-              <Image src="/logo.png" alt="Shilaabo Car Hire" width={112} height={112} priority className="h-28 w-28 object-contain" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-background flex items-center justify-center p-4 sm:p-6">
+      {/* Decorative background accents */}
+      <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+
+      <Card className="relative w-full max-w-2xl border-border/60 shadow-2xl backdrop-blur-sm">
+        <CardHeader className="space-y-3 text-center">
+          <div className="flex justify-center">
+            <div className="rounded-full bg-gradient-to-br from-primary/15 to-accent/15 p-1.5 ring-1 ring-border">
+              <div className="rounded-full bg-background p-3">
+                <Image
+                  src="/logo.png"
+                  alt="Shilaabo Car Hire"
+                  width={96}
+                  height={96}
+                  priority
+                  className="h-24 w-24 object-contain"
+                />
+              </div>
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold tracking-tight">Shilaabo Car Hire</CardTitle>
-          <CardDescription className="text-base">Please provide your details to complete your booking</CardDescription>
+          <div className="flex justify-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary ring-1 ring-primary/20">
+              <Car className="h-3.5 w-3.5" />
+              Car Hire Booking
+            </span>
+          </div>
+          <CardTitle className="text-3xl font-bold tracking-tight text-balance">Shilaabo Car Hire</CardTitle>
+          <CardDescription className="text-base text-pretty">
+            Fill in your details below and submit your booking directly via WhatsApp.
+          </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Full Name */}
-              <div className="space-y-2">
-                <Label htmlFor="fullName">
-                  Full Name <span className="text-destructive">*</span>
-                </Label>
-                <Input
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Personal Details */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <User className="h-4 w-4" />
+                </span>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">Personal Details</h2>
+              </div>
+              <div className="grid gap-5 md:grid-cols-2">
+                <FormField
                   id="fullName"
-                  name="fullName"
+                  label="Full Name"
                   placeholder="John Doe"
+                  icon={<User className="h-4 w-4" />}
                   value={formData.fullName}
+                  error={errors.fullName}
                   onChange={handleChange}
-                  className={errors.fullName ? "border-destructive" : ""}
                 />
-                {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-              </div>
-
-              {/* ID/Passport */}
-              <div className="space-y-2">
-                <Label htmlFor="idPassport">
-                  ID / Passport Number <span className="text-destructive">*</span>
-                </Label>
-                <Input
+                <FormField
                   id="idPassport"
-                  name="idPassport"
+                  label="ID / Passport Number"
                   placeholder="123456789"
+                  icon={<IdCard className="h-4 w-4" />}
                   value={formData.idPassport}
+                  error={errors.idPassport}
                   onChange={handleChange}
-                  className={errors.idPassport ? "border-destructive" : ""}
                 />
-                {errors.idPassport && <p className="text-sm text-destructive">{errors.idPassport}</p>}
-              </div>
-
-              {/* Driving License */}
-              <div className="space-y-2">
-                <Label htmlFor="dlNumber">
-                  Driving License Number <span className="text-destructive">*</span>
-                </Label>
-                <Input
+                <FormField
                   id="dlNumber"
-                  name="dlNumber"
+                  label="Driving License Number"
                   placeholder="DL123456"
+                  icon={<CreditCard className="h-4 w-4" />}
                   value={formData.dlNumber}
+                  error={errors.dlNumber}
                   onChange={handleChange}
-                  className={errors.dlNumber ? "border-destructive" : ""}
                 />
-                {errors.dlNumber && <p className="text-sm text-destructive">{errors.dlNumber}</p>}
-              </div>
-
-              {/* Citizenship */}
-              <div className="space-y-2">
-                <Label htmlFor="citizenship">
-                  Citizenship <span className="text-destructive">*</span>
-                </Label>
-                <Input
+                <FormField
                   id="citizenship"
-                  name="citizenship"
+                  label="Citizenship"
                   placeholder="Kenya"
+                  icon={<Flag className="h-4 w-4" />}
                   value={formData.citizenship}
+                  error={errors.citizenship}
                   onChange={handleChange}
-                  className={errors.citizenship ? "border-destructive" : ""}
                 />
-                {errors.citizenship && <p className="text-sm text-destructive">{errors.citizenship}</p>}
+                <FormField
+                  id="phoneNumber"
+                  label="Phone Number"
+                  type="tel"
+                  placeholder="+254 792 837 410"
+                  icon={<Phone className="h-4 w-4" />}
+                  value={formData.phoneNumber}
+                  error={errors.phoneNumber}
+                  onChange={handleChange}
+                />
+                <FormField
+                  id="address"
+                  label="Residential Address"
+                  placeholder="123 Main Street, Nairobi"
+                  icon={<MapPin className="h-4 w-4" />}
+                  value={formData.address}
+                  error={errors.address}
+                  onChange={handleChange}
+                />
               </div>
+            </section>
 
-              {/* Vehicle Name */}
-              <div className="space-y-2">
-                <Label htmlFor="vehicleName">
-                  Vehicle Name <span className="text-destructive">*</span>
-                </Label>
-                <Input
+            {/* Rental Details */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent-foreground">
+                  <Car className="h-4 w-4" />
+                </span>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">Rental Details</h2>
+              </div>
+              <div className="grid gap-5 md:grid-cols-2">
+                <FormField
                   id="vehicleName"
-                  name="vehicleName"
+                  label="Vehicle Name"
                   placeholder="Toyota Camry"
+                  icon={<Car className="h-4 w-4" />}
                   value={formData.vehicleName}
+                  error={errors.vehicleName}
                   onChange={handleChange}
-                  className={errors.vehicleName ? "border-destructive" : ""}
                 />
-                {errors.vehicleName && <p className="text-sm text-destructive">{errors.vehicleName}</p>}
-              </div>
-
-              {/* Car Number Plate */}
-              <div className="space-y-2">
-                <Label htmlFor="carNumberPlate">
-                  Car Number Plate <span className="text-destructive">*</span>
-                </Label>
-                <Input
+                <FormField
                   id="carNumberPlate"
-                  name="carNumberPlate"
+                  label="Car Number Plate"
                   placeholder="KAB 123C"
+                  icon={<Hash className="h-4 w-4" />}
                   value={formData.carNumberPlate}
+                  error={errors.carNumberPlate}
                   onChange={handleChange}
-                  className={errors.carNumberPlate ? "border-destructive" : ""}
                 />
-                {errors.carNumberPlate && <p className="text-sm text-destructive">{errors.carNumberPlate}</p>}
-              </div>
-
-              {/* Number of Days */}
-              <div className="space-y-2">
-                <Label htmlFor="numberOfDays">
-                  Number of Days <span className="text-destructive">*</span>
-                </Label>
-                <Input
+                <FormField
                   id="numberOfDays"
-                  name="numberOfDays"
+                  label="Number of Days"
                   type="number"
-                  min="1"
-                  max="365"
+                  min={1}
+                  max={365}
                   placeholder="1"
+                  icon={<CalendarDays className="h-4 w-4" />}
                   value={formData.numberOfDays}
+                  error={errors.numberOfDays}
                   onChange={handleChange}
-                  className={errors.numberOfDays ? "border-destructive" : ""}
                 />
-                {errors.numberOfDays && <p className="text-sm text-destructive">{errors.numberOfDays}</p>}
               </div>
-            </div>
 
-            {/* Address - Full Width */}
-            <div className="space-y-2">
-              <Label htmlFor="address">
-                Residential Address <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="address"
-                name="address"
-                placeholder="123 Main Street, Nairobi"
-                value={formData.address}
-                onChange={handleChange}
-                className={errors.address ? "border-destructive" : ""}
-              />
-              {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
-            </div>
-
-            {/* Phone Number - Full Width */}
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">
-                Phone Number <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                placeholder="+254 792 837 410"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className={errors.phoneNumber ? "border-destructive" : ""}
-              />
-              {errors.phoneNumber && <p className="text-sm text-destructive">{errors.phoneNumber}</p>}
-            </div>
-
-            {/* Rental Duration Display */}
-            {formData.numberOfDays && parseInt(formData.numberOfDays) > 0 && (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
-                <div className="text-lg font-semibold text-primary">
-                  Car Gone For: {formData.numberOfDays} days
+              {/* Rental Duration Display */}
+              {formData.numberOfDays && parseInt(formData.numberOfDays) > 0 && (
+                <div className="flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/10 p-4 text-center">
+                  <CalendarDays className="h-5 w-5 text-primary" />
+                  <span className="text-lg font-semibold text-primary">
+                    Car Gone For: {formData.numberOfDays} {parseInt(formData.numberOfDays) === 1 ? "day" : "days"}
+                  </span>
                 </div>
-              </div>
-            )}
+              )}
+            </section>
 
-            <Button type="submit" className="w-full text-lg h-12" size="lg">
-              Submit via WhatsApp
-            </Button>
-
-            <p className="text-xs text-center text-muted-foreground">
-              Your information will be sent securely via WhatsApp to complete your booking
-            </p>
+            <div className="space-y-3">
+              <Button type="submit" className="h-12 w-full text-base font-semibold" size="lg">
+                <MessageCircle className="h-5 w-5" />
+                Submit via WhatsApp
+              </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                Your information will be sent securely via WhatsApp to complete your booking.
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+type FormFieldProps = {
+  id: FieldName
+  label: string
+  placeholder: string
+  icon: React.ReactNode
+  value: string
+  error?: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  type?: string
+  min?: number
+  max?: number
+}
+
+function FormField({ id, label, placeholder, icon, value, error, onChange, type = "text", min, max }: FormFieldProps) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>
+        {label} <span className="text-destructive">*</span>
+      </Label>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          {icon}
+        </span>
+        <Input
+          id={id}
+          name={id}
+          type={type}
+          min={min}
+          max={max}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          className={cn("pl-9", error && "border-destructive focus-visible:ring-destructive/40")}
+        />
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   )
 }
